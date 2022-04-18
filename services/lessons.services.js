@@ -9,6 +9,7 @@ const Students = models.students
 const Teachers = models.teachers
 const Lesson_students = models.lesson_students
 const Lesson_teachers = models.lesson_teachers
+const lessonsRepository = require('../repository/lessons.repository')
 
 class LessonsServices{
 
@@ -30,7 +31,7 @@ class LessonsServices{
                     const date = params.days[dayIndex] - startDay
                     dayIndex++
                     newDate.setDate(newDate.getDate() + date)
-                    const lessons = await addLessons(params, newDate)
+                    const lessons = await lessonsRepository.createLessons(params, newDate)
                     id.push(lessons.dataValues.id)
                 }
             } else {
@@ -50,7 +51,7 @@ class LessonsServices{
                     if (newDate.getTime() > lastDate.getTime()) {
                         break
                     }
-                    const lessons = await addLessons(params, newDate)
+                    const lessons = await lessonsRepository.createLessons(params, newDate)
                     id.push(lessons.dataValues.id)
                 }
             }
@@ -109,57 +110,41 @@ class LessonsServices{
                     }
                 }
             }
-            const getLessons = await Lessons.findAll(options)
+            const getLessons = await lessonsRepository.getLessons(options)
             return getLessons
         } catch (error) {
             throw (error)
         }
     }
 
+    async addStudent(filter) {
+        try {
+
+        }
+        catch (error) {
+            throw (error)
+        }
+    }
+
     async deleteLesson(id) {
         try {
-            const deleteLesson = await Lessons.destroy({
-                where: {
-                    id: id
-                }
-            })
-            if (deleteLesson === 1) return true
-            else return false
+            const deleteLesson = await lessonsRepository.deleteLessons(id)
+            return deleteLesson
         }
         catch (error) {
             throw (error)
         }
     }
 
-    async lessonFinished(params) {
+    async lessonFinished(id) {
         try {
-            const updateStatus = await Lessons.update(
-                {status: 1},
-                {
-                    where: {
-                        title: params.title,
-                        date: params.date
-                    }
-                }
-            )
-            return updateStatus
+            const status = await lessonsRepository.lessonsFinished(id)
+            return status
         }
         catch (error) {
             throw (error)
         }
     }
-}
-
-async function addLessons(params, newDate) {
-    const createLessons = await Lessons.create({
-        title: params.title,
-        date: newDate
-    })
-    params.teacherIds.forEach( async (element) => {
-        const teachers = await Teachers.findByPk(element)
-        await createLessons.addTeachers(teachers, {through: Lesson_teachers})
-    })
-    return createLessons
 }
 
 function checkDay(params) {
