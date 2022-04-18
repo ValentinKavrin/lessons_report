@@ -31,8 +31,7 @@ class LessonsRepository {
 
     async getLessons(options){
         try {
-            const getLessons = await Lessons.findAll(options)
-            return getLessons
+            return await Lessons.findAll(options)
         }
         catch (error) {
             throw (error)
@@ -46,8 +45,12 @@ class LessonsRepository {
                     id: id
                 }
             })
-            if (deleteLesson === 1) return true
-            else return false
+            if (deleteLesson === 1) {
+                return true
+            } else {
+                return false
+            }
+
         }
         catch (error) {
             throw (error)
@@ -56,7 +59,7 @@ class LessonsRepository {
 
     async lessonsFinished(id){
         try {
-            const updateStatus = await Lessons.update(
+            return await Lessons.update(
                 {status: 1},
                 {
                     where: {
@@ -64,14 +67,25 @@ class LessonsRepository {
                     }
                 }
             )
-            return updateStatus
         }
         catch (error) {
             throw (error)
         }
     }
 
-
+    async addStudent(lesson_id, students_id) {
+        try {
+            const lesson = await Lessons.findByPk(lesson_id)
+            for (const element of students_id) {
+                const student = await Students.findByPk(element)
+                await lesson.addStudents(student, {through: Lesson_students})
+            }
+            return lesson
+        }
+        catch (error) {
+            throw (error)
+        }
+    }
 }
 
 module.exports = new LessonsRepository()

@@ -110,16 +110,20 @@ class LessonsServices{
                     }
                 }
             }
-            const getLessons = await lessonsRepository.getLessons(options)
-            return getLessons
+            return await lessonsRepository.getLessons(options)
         } catch (error) {
             throw (error)
         }
     }
 
-    async addStudent(filter) {
+    async addStudent(params) {
         try {
-
+            let lessons = []
+            for (const elem of params.lessons_id) {
+                const addStudent = await lessonsRepository.addStudent(elem, params.students_id)
+                lessons.push(addStudent)
+            }
+            return lessons
         }
         catch (error) {
             throw (error)
@@ -128,8 +132,7 @@ class LessonsServices{
 
     async deleteLesson(id) {
         try {
-            const deleteLesson = await lessonsRepository.deleteLessons(id)
-            return deleteLesson
+            return await lessonsRepository.deleteLessons(id)
         }
         catch (error) {
             throw (error)
@@ -138,8 +141,7 @@ class LessonsServices{
 
     async lessonFinished(id) {
         try {
-            const status = await lessonsRepository.lessonsFinished(id)
-            return status
+            return await lessonsRepository.lessonsFinished(id)
         }
         catch (error) {
             throw (error)

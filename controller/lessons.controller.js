@@ -5,7 +5,7 @@ class LessonsController {
     async createLessons(req, res){
         try {
             const result = await lessonsServices.createLessons(req.body)
-            return res.status(200).json(result)
+            res.status(200).json(result)
         } catch (error) {
             res.status(500).send({
                 message: "Something went wrong, try again.",
@@ -28,7 +28,8 @@ class LessonsController {
 
     async addStudent(req, res) {
         try {
-
+            const addStudents = await lessonsServices.addStudent(req.body)
+            res.status(200).json(addStudents)
         }
         catch (error) {
             res.status(500).send({
