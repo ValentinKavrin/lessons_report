@@ -4,10 +4,6 @@ class LessonsController {
 
     async createLessons(req, res){
         try {
-            const re = new RegExp('^[a-zA-Z0-9 ]+$');
-            if (!re.test(req.body.title)) {
-                return res.status(400).json('Название должно содержать только латинские буквы и цифры')
-            }
             const result = await lessonsServices.createLessons(req.body)
             return res.status(200).json(result)
         } catch (error) {
@@ -23,6 +19,18 @@ class LessonsController {
             const lessons = await lessonsServices.getLessons(req.query)
             res.status(200).json(lessons)
         } catch (error) {
+            res.status(500).send({
+                message: "Something went wrong, try again.",
+                error: error.message,
+            });
+        }
+    }
+
+    async addStudent(req, res) {
+        try {
+
+        }
+        catch (error) {
             res.status(500).send({
                 message: "Something went wrong, try again.",
                 error: error.message,
@@ -46,7 +54,7 @@ class LessonsController {
 
     async lessonFinished(req, res) {
         try {
-            const status = await lessonsServices.lessonFinished(req.body)
+            const status = await lessonsServices.lessonFinished(req.params.id)
             res.status(200).json(status)
         }
         catch (error) {
