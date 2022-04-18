@@ -12,8 +12,57 @@ const Lesson_teachers = models.lesson_teachers
 
 class LessonsServices{
 
+    async createLessons(params) {
+        try {
+            let dayIndex = checkDay(params).dayIndex
+            let firstDate = checkDay(params).firstDate
+            let startDay = checkDay(params).startDay
+            let id = []
+            if (params.hasOwnProperty('lessonsCount')) {
+                for (let i = 0; i < params.lessonsCount; i++) {
+                    let newDate = new Date(firstDate)
+                    if (dayIndex === params.days.length) {
+                        params.days.forEach((element, index) => {
+                            params.days[index] = element + 7
+                        })
+                        dayIndex = 0
+                    }
+                    const date = params.days[dayIndex] - startDay
+                    dayIndex++
+                    newDate.setDate(newDate.getDate() + date)
+                    const lessons = await addLessons(params, newDate)
+                    id.push(lessons.dataValues.id)
+                }
+            } else {
+                let newDate = new Date
+                const lastDate = new Date(params.lastDate)
+                while (newDate.getTime() < lastDate.getTime()){
+                    newDate = new Date(firstDate)
+                    if (dayIndex === params.days.length) {
+                        params.days.forEach((element, index) => {
+                            params.days[index] = element + 7
+                        })
+                        dayIndex = 0
+                    }
+                    const date = params.days[dayIndex] - startDay
+                    dayIndex++
+                    newDate.setDate(newDate.getDate() + date)
+                    if (newDate.getTime() > lastDate.getTime()) {
+                        break
+                    }
+                    const lessons = await addLessons(params, newDate)
+                    id.push(lessons.dataValues.id)
+                }
+            }
+            return id
+        } catch (error) {
+            throw (error)
+        }
+    }
     async getLessons(filter) {
         try {
+            let limit = 5
+            if (filter.hasOwnProperty('lessonsPerPage')) limit = filter.lessonsPerPage
             const options = {
                 where: {},
                 include: [
@@ -24,9 +73,13 @@ class LessonsServices{
                     {
                         model: Students,
                     }
-                ]
+                ],
+                order:[
+                    ["id", "ASC"]
+                ],
+                offset: (filter.page - 1) * limit,
+                limit: limit
             }
-            console.log(filter);
             if (Object.keys(filter).length !== 0) {
                 options.where = []
                 if (filter.hasOwnProperty('status')) {
@@ -44,9 +97,16 @@ class LessonsServices{
                         options.where.push({date: date})
                     }
                 }
-                if (filter.hasOwnProperty('teachers_id')) {
+                if (filter.hasOwnProperty('teacherIds')) {
                     options.include[0].where[Op.or] = []
-                    options.include[0].where[Op.or].push({id: Number(filter.teachers_id)})
+                    if (filter.teacherIds.includes(',')) {
+                        const teachers_id = filter.teacherIds.split(',')
+                        teachers_id.forEach((elem) => {
+                            options.include[0].where[Op.or].push({id: Number(elem)})
+                        })
+                    } else {
+                        options.include[0].where[Op.or].push({id: Number(filter.teacherIds)})
+                    }
                 }
             }
             const getLessons = await Lessons.findAll(options)
@@ -56,50 +116,35 @@ class LessonsServices{
         }
     }
 
-    async createLessons(params) {
+    async deleteLesson(id) {
         try {
-            let dayIndex = checkDay(params).dayIndex
-            let firstDate = checkDay(params).firstDate
-            let startDay = checkDay(params).startDay
-            let id = []
-            if (params.hasOwnProperty('lessonsCount')) {
-                for (let i = 0; i < params.lessonsCount; i++) {
-                    let newDate = new Date(firstDate)
-                    if (dayIndex === params.days.length) { 
-                        params.days.forEach((element, index) => {
-                            params.days[index] = element + 7
-                        })
-                        dayIndex = 0
-                    }
-                    const date = params.days[dayIndex] - startDay
-                    dayIndex++
-                    newDate.setDate(newDate.getDate() + date)
-                    const lessons = await addLessons(params, newDate)
-                    id.push(lessons.dataValues.id)
+            const deleteLesson = await Lessons.destroy({
+                where: {
+                    id: id
                 }
-            } else {
-                let newDate = new Date
-                const lastDate = new Date(params.lastDate)
-                while (newDate.getTime() < lastDate.getTime()){
-                    newDate = new Date(firstDate)
-                    if (dayIndex === params.days.length) { 
-                        params.days.forEach((element, index) => {
-                            params.days[index] = element + 7
-                        })
-                        dayIndex = 0
+            })
+            if (deleteLesson === 1) return true
+            else return false
+        }
+        catch (error) {
+            throw (error)
+        }
+    }
+
+    async lessonFinished(params) {
+        try {
+            const updateStatus = await Lessons.update(
+                {status: 1},
+                {
+                    where: {
+                        title: params.title,
+                        date: params.date
                     }
-                    const date = params.days[dayIndex] - startDay
-                    dayIndex++
-                    newDate.setDate(newDate.getDate() + date)
-                    if (newDate.getTime() > lastDate.getTime()) {
-                        break
-                    }
-                    const lessons = await addLessons(params, newDate)
-                    id.push(lessons.dataValues.id)
-                } 
-            }
-            return id
-        } catch (error) {
+                }
+            )
+            return updateStatus
+        }
+        catch (error) {
             throw (error)
         }
     }

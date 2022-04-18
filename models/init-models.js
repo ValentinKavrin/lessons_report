@@ -18,11 +18,11 @@ function initModels(sequelize) {
   students.hasMany(lesson_students, { as: 'lesson_students', foreignKey: 'student_id'});
   lesson_students.belongsTo(students, { as: 'students', foreignKey: 'student_id'});*/
  
-  lessons.belongsToMany(students, {through: lesson_students, foreignKey: 'lesson_id'})
+  lessons.belongsToMany(students, {through: lesson_students, foreignKey: 'lesson_id', onDelete: 'cascade'})
   students.belongsToMany(lessons, {through: lesson_students, foreignKey: 'student_id'})
 
-  lessons.belongsToMany(teachers, {through: lesson_teachers, foreignKey: 'lesson_id'})
-  teachers.belongsToMany(lessons, {through: lesson_teachers, foreignKey: 'teacher_id'})
+  lessons.belongsToMany(teachers, {through: lesson_teachers, foreignKey: 'lesson_id', onDelete: 'cascade', hooks: true})
+  teachers.belongsToMany(lessons, {through: lesson_teachers, foreignKey: 'teacher_id', onDelete: 'cascade', hooks: true})
 
   /*lesson_teachers.belongsTo(lessons, { as: "lessons", foreignKey: "lesson_id"});
   lessons.hasMany(lesson_teachers, { as: "lesson_teachers", foreignKey: "lesson_id"});

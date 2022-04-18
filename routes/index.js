@@ -1,9 +1,6 @@
 const Router = require('express')
-const LessonsController = require('../controller/lessons.controller')
-
 const router = new Router()
 
-router.get('/', LessonsController.getLessons)
-router.post('/lessons', LessonsController.createLessons)
+router.use('/lessons', require('./lessons.router'))
 
 module.exports = router
