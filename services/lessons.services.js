@@ -15,9 +15,9 @@ class LessonsServices{
 
     async createLessons(params) {
         try {
-            let dayIndex = checkDay(params).dayIndex
-            let firstDate = checkDay(params).firstDate
-            let startDay = checkDay(params).startDay
+            let dayIndex = this.checkDay(params).dayIndex
+            let firstDate = this.checkDay(params).firstDate
+            let startDay = this.checkDay(params).startDay
             let id = []
             if (params.hasOwnProperty('lessonsCount')) {
                 for (let i = 0; i < params.lessonsCount; i++) {
@@ -147,28 +147,30 @@ class LessonsServices{
             throw (error)
         }
     }
+
+    checkDay(params) {
+        let dayIndex = 0
+        let firstDate = new Date(params.firstDate)
+        let startDay = params.days.find(elem => elem >= firstDate.getDay())
+        if (startDay !== undefined) {
+            if (startDay !== firstDate.getDay()) {
+                firstDate.setDate(firstDate.getDate() + (startDay - firstDate.getDay()))
+            }
+            dayIndex = params.days.indexOf(startDay)
+        } else {
+            startDay = new Date(params.firstDate).getDay()
+            params.days.forEach((element, index) => {
+                params.days[index] = element + 7
+            })
+        }
+        return {
+            startDay,
+            dayIndex,
+            firstDate,
+        }
+    }
 }
 
-function checkDay(params) {
-    let dayIndex = 0
-    let firstDate = new Date(params.firstDate)
-    let startDay = params.days.find(elem => elem >= firstDate.getDay())
-    if (startDay !== undefined) {
-        if (startDay !== firstDate.getDay()) {
-            firstDate.setDate(firstDate.getDate() + (startDay - firstDate.getDay()))
-        }
-        dayIndex = params.days.indexOf(startDay)
-    } else {
-        startDay = new Date(params.firstDate).getDay()
-        params.days.forEach((element, index) => {
-            params.days[index] = element + 7
-        })
-    }
-    return {
-        startDay,
-        dayIndex,
-        firstDate,
-    }
-}
+
 
 module.exports = new LessonsServices()
