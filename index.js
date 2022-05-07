@@ -10,4 +10,5 @@ app.use(express.json())
 db.sequelize.sync()
 app.use('/api', router)
 
+
 app.listen(PORT, () => console.log(`lessons_report listening on port ${PORT}!`)); 

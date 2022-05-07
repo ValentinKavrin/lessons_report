@@ -8,6 +8,7 @@ module.exports = function (req, res, next) {
         const titleReg = new RegExp('^[a-zA-Z0-9 ]{3,30}$');
         const dateReg = new RegExp('^\\d{4}-\\d{2}-\\d{2}$')
         const daysReg = new RegExp('^[0-6]$')
+
         const days = req.body.days
         const date = req.body.firstDate
         const title = req.body.title.trim()

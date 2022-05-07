@@ -19,20 +19,15 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: 0
+    },
+    class: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     }
   }, {
     sequelize,
     tableName: 'lessons',
     schema: 'public',
     timestamps: false,
-    /*indexes: [
-      {
-        name: "lessons_pkey",
-        unique: true,
-        fields: [
-          { name: "id" },
-        ]
-      },
-    ]*/
   });
 };
