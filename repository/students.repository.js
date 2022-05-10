@@ -28,7 +28,7 @@ class StudentsRepository {
         }
     }
 
-    async updateName(student,options) {
+    async updateStudent(student,options) {
         try {
             return await Students.update(student, options)
         }
@@ -37,16 +37,17 @@ class StudentsRepository {
         }
     }
 
-    /*async updateClass() {
+    async updateAllClass() {
         try {
-            return await Students.update({
-                class: +1
+            const deleteStudent = await Students.destroy({
+                where: { class: 11 }
             })
+            return await Students.increment('class', {where: {class: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}})
         }
         catch (error) {
             throw (error)
         }
-    }*/
+    }
 
     async deleteStudents(id) {
         try {

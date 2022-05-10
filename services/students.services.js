@@ -44,7 +44,7 @@ class StudentsServices {
                 name: params.name,
                 password: hashPassword
             }
-            return await studentRepo.updateName(student, options)
+            return await studentRepo.updateStudent(student, options)
         }
         catch (error) {
             throw (error)
@@ -65,8 +65,13 @@ class StudentsServices {
         }
     }
 
-    async updateClass() {
-
+    async updateAllClass() {
+        try {
+            return await studentRepo.updateAllClass()
+        }
+        catch (error) {
+            throw (error)
+        }
     }
 
     randomString(i) {

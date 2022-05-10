@@ -9,5 +9,6 @@ router
     .get('/',StudentController.getStudents)
     .put('/:id', studentValidation, StudentController.updateStudent)
     .delete('/:id',StudentController.deleteStudent)
+    .patch('/', StudentController.updateClass)
 
 module.exports = router

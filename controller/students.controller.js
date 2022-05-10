@@ -62,6 +62,21 @@ class StudentsController {
             });
         }
     }
+
+    async updateClass(req,res) {
+        try {
+            if (req.body.class === true) {
+                const updateClass = await studentServices.updateAllClass()
+                res.status(200).json( {message: 'Обновление классов прошло успешно'})
+            }
+        }
+        catch (error) {
+            res.status(500).send({
+                message: "Something went wrong, try again.",
+                error: error.message,
+            });
+        }
+    }
 }
 
 module.exports = new StudentsController()
