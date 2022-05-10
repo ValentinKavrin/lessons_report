@@ -30,7 +30,7 @@ module.exports = function (req, res, next) {
         }
 
         if (req.body.class !== undefined) {
-            const numberReg = new RegExp('^\d&')
+            const numberReg = new RegExp('^[0-9]*$')
             if (!numberReg.test(req.body.class)) {
                 return res.status(400).json( {message: 'Номер класса должнен содержать только цифру'} )
             }
