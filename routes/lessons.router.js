@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const LessonsController = require('../controller/lessons.controller')
-const validMiddleware = require('../middleware/valid.middleware')
+const validMiddleware = require('../middleware/lessons.validation')
 
 router
     .post("/", validMiddleware, LessonsController.createLessons)
