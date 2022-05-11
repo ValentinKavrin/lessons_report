@@ -8,7 +8,7 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true
     },
     name: {
-      type: DataTypes.STRING(10),
+      type: DataTypes.STRING(30),
       allowNull: true
     },
     discipline: {
@@ -21,7 +21,7 @@ module.exports = function(sequelize, DataTypes) {
       unique: true
     },
     password: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(60),
       allowNull: false
     }
   }, {
