@@ -5,7 +5,10 @@ class LessonsController {
     async createLessons(req, res){
         try {
             const result = await lessonsServices.createLessons(req.body)
-            res.status(200).json(result)
+            if (!result) {
+                return res.status(400).json({message: 'Нет свободных учителей'})
+            }
+            return res.status(200).json(result)
         } catch (error) {
             res.status(500).send({
                 message: "Something went wrong, try again.",

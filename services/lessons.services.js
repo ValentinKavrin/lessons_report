@@ -4,12 +4,14 @@ const sequelize = require('../models').sequelize
 const initModels = require('../models/init-models').initModels
 const models = initModels(sequelize)
 
+const lessonsRepository = require('../repository/lessons.repository')
+const teachersRepository = require('../repository/teachers.repository')
+
 const Lessons = models.lessons
 const Students = models.students
 const Teachers = models.teachers
 const Lesson_students = models.lesson_students
 const Lesson_teachers = models.lesson_teachers
-const lessonsRepository = require('../repository/lessons.repository')
 
 class LessonsServices{
 
@@ -19,6 +21,10 @@ class LessonsServices{
             let firstDate = this.checkDay(params).firstDate
             let startDay = this.checkDay(params).startDay
             let id = []
+            const teacher_id = await this.checkTeacher({discipline: params.title})
+            if (!teacher_id) {
+                return false
+            }
             if (params.hasOwnProperty('lessonsCount')) {
                 for (let i = 0; i < params.lessonsCount; i++) {
                     let newDate = new Date(firstDate)
@@ -31,7 +37,7 @@ class LessonsServices{
                     const date = params.days[dayIndex] - startDay
                     dayIndex++
                     newDate.setDate(newDate.getDate() + date)
-                    const lessons = await lessonsRepository.createLessons(params, newDate)
+                    const lessons = await lessonsRepository.createLessons(params, newDate, teacher_id)
                     id.push(lessons.dataValues.id)
                 }
             } else {
@@ -167,6 +173,22 @@ class LessonsServices{
             startDay,
             dayIndex,
             firstDate,
+        }
+    }
+
+    async checkTeacher(discipline) {
+        try {
+            const teachers = await teachersRepository.getTeachers(discipline)
+            for (let i = 0; i < teachers.length; i++) {
+                const count = await lessonsRepository.checkCountTeacher(teachers[i].id)
+                if (count < 5) {
+                    return teachers[i].id
+                }
+            }
+            return false
+        }
+        catch (e) {
+            throw e
         }
     }
 }

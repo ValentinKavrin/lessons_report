@@ -12,16 +12,18 @@ const Lesson_teachers = models.lesson_teachers
 
 class LessonsRepository {
 
-    async createLessons(params, newDate){
+    async createLessons(params, newDate, teacher_id){
         try {
             const createLessons = await Lessons.create({
                 title: params.title,
-                date: newDate
+                date: newDate,
+                class: params.class
             })
-            params.teacherIds.forEach( async (element) => {
-                const teachers = await Teachers.findByPk(element)
-                await createLessons.addTeachers(teachers, {through: Lesson_teachers})
-            })
+            await createLessons.addTeachers(teacher_id, {through: Lesson_teachers})
+            // params.teacherIds.forEach( async (element) => {
+            //     const teachers = await Teachers.findByPk(element)
+            //
+            // })
             return createLessons
         }
         catch (error) {
@@ -81,6 +83,15 @@ class LessonsRepository {
                 await lesson.addStudents(student, {through: Lesson_students})
             }
             return lesson
+        }
+        catch (error) {
+            throw (error)
+        }
+    }
+
+    async checkCountTeacher(id) {
+        try {
+            return await Lesson_teachers.count({where: {teacher_id: id}})
         }
         catch (error) {
             throw (error)

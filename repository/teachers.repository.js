@@ -19,9 +19,22 @@ class TeachersRepository {
         }
     }
 
-    async getTeachers() {
+    async getTeachers(param) {
         try {
-            return await Teachers.findAll()
+            return await Teachers.findAll({
+                where: param
+            })
+        }
+        catch (error) {
+            throw error
+        }
+    }
+
+    async getOneTeacher(param) {
+        try {
+            return await Teachers.findOne({
+                where: param
+            })
         }
         catch (error) {
             throw error
