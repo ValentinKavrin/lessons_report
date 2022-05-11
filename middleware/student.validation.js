@@ -7,19 +7,14 @@ module.exports = function (req, res, next) {
         if (req.body.name !== undefined) {
             const nameReg = new RegExp('^[a-zA-Z ]{2,30}$')
             const name = req.body.name.trim()
-            if (name !== '') {
-                if (!nameReg.test(name)) {
-                    console.log(name.length)
-                    if (name.length >= 2 && name.length <= 30) {
-                        return res.status(400).json( {message: 'Имя должно содержать только латинские буквы'} )
-                    } else {
-                        return res.status(400).json( {message: 'Имя должно быть длиннее 2 и короче 30 символов'} )
-                    }
+            if (!nameReg.test(name)) {
+                if (name.length >= 2 && name.length <= 30) {
+                    return res.status(400).json( {message: 'Имя должно содержать только латинские буквы'} )
+                } else {
+                    return res.status(400).json( {message: 'Имя должно быть длиннее 2 и короче 30 символов'} )
                 }
-                req.body.name = name
-            } else {
-                return res.status(400).json( {message: 'Имя не может быть пустым'} )
             }
+            req.body.name = name
         }
 
         if (req.body.password !== undefined) {
