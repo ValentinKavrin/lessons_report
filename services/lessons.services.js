@@ -22,9 +22,6 @@ class LessonsServices{
             let startDay = this.checkDay(params).startDay
             let id = []
             const teacher_id = await this.checkTeacher({discipline: params.title})
-            if (!teacher_id) {
-                return false
-            }
             if (params.hasOwnProperty('lessonsCount')) {
                 for (let i = 0; i < params.lessonsCount; i++) {
                     let newDate = new Date(firstDate)
@@ -70,19 +67,26 @@ class LessonsServices{
         try {
             let limit = 5
             if (filter.hasOwnProperty('lessonsPerPage')) limit = filter.lessonsPerPage
+            const newAttributes = [sequelize.literal(
+                    `(select count(*) from students 
+                    where students.class = lessons.class)`
+                ),'studentsCount']
             const options = {
+                attributes: {
+                    include: [
+                        newAttributes
+                    ]
+                },
                 where: {},
                 include: [
                     {
                         model: Teachers,
                         where: {}
-                    },
-                    {
-                        model: Students,
                     }
                 ],
                 order:[
-                    ["id", "ASC"]
+                    ['date', 'ASC'],
+                    ['id', 'ASC']
                 ],
                 offset: (filter.page - 1) * limit,
                 limit: limit
@@ -97,23 +101,38 @@ class LessonsServices{
                         const date = filter.date.split(',')
                         const startDate = new Date(date[0])
                         const stopDate = new Date(date[1])
-                        options.where = {date: {}}
-                        options.where.date = {[Op.between]: [startDate, stopDate]}
+                        const index = options.where.push({date: {}}) - 1
+                        options.where[index].date = {[Op.between]: [startDate, stopDate]}
                     } else {
                         const date = new Date(filter.date)
                         options.where.push({date: date})
                     }
                 }
                 if (filter.hasOwnProperty('teacherIds')) {
-                    options.include[0].where[Op.or] = []
                     if (filter.teacherIds.includes(',')) {
+                        options.include[0].where[Op.or] = []
                         const teachers_id = filter.teacherIds.split(',')
                         teachers_id.forEach((elem) => {
                             options.include[0].where[Op.or].push({id: Number(elem)})
                         })
                     } else {
-                        options.include[0].where[Op.or].push({id: Number(filter.teacherIds)})
+                        options.include[0].where = {id: Number(filter.teacherIds)}
                     }
+                }
+                if (filter.hasOwnProperty('class')) {
+                    if (filter.class.includes(',')) {
+                        const index = options.where.push({class: {}}) - 1
+                        options.where[index].class[Op.or] = []
+                        const numberOfClass = filter.class.split(',')
+                        numberOfClass.forEach((elem) => {
+                            options.where[index].class[Op.or].push( Number(elem))
+                        })
+                    } else {
+                        options.where.push({class: Number(filter.class)})
+                    }
+                }
+                if (filter.hasOwnProperty('discipline')) {
+                    options.where.push({title: filter.discipline})
                 }
             }
             return await lessonsRepository.getLessons(options)
@@ -181,11 +200,11 @@ class LessonsServices{
             const teachers = await teachersRepository.getTeachers(discipline)
             for (let i = 0; i < teachers.length; i++) {
                 const count = await lessonsRepository.checkCountTeacher(teachers[i].id)
-                if (count < 5) {
+                if (count < 30) {
                     return teachers[i].id
                 }
             }
-            return false
+            throw new HttpError('Нет свободных учителей!', 400)
         }
         catch (e) {
             throw e
@@ -193,6 +212,11 @@ class LessonsServices{
     }
 }
 
-
+class HttpError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode
+    }
+}
 
 module.exports = new LessonsServices()

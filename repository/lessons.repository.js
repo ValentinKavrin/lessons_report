@@ -20,16 +20,17 @@ class LessonsRepository {
                 class: params.class
             })
             await createLessons.addTeachers(teacher_id, {through: Lesson_teachers})
-            // params.teacherIds.forEach( async (element) => {
-            //     const teachers = await Teachers.findByPk(element)
-            //
-            // })
             return createLessons
         }
         catch (error) {
             throw (error)
         }
     }
+  /*  [sequelize.literal(`(
+                                    select * from lessons
+                                    left outer join students
+                                    on students.class = lessons.class
+                                    )`), 'students']*/
 
     async getLessons(options){
         try {

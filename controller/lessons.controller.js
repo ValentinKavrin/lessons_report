@@ -5,12 +5,16 @@ class LessonsController {
     async createLessons(req, res){
         try {
             const result = await lessonsServices.createLessons(req.body)
-            if (!result) {
-                return res.status(400).json({message: 'Нет свободных учителей'})
-            }
             return res.status(200).json(result)
         } catch (error) {
-            res.status(500).send({
+            console.log(error)
+            if (error.message === 'Нет свободных учителей!') {
+                return res.status(400).send({
+                    message: "Something went wrong, try again.",
+                    error: error.message,
+                });
+            }
+            return res.status(500).send({
                 message: "Something went wrong, try again.",
                 error: error.message,
             });
@@ -19,8 +23,21 @@ class LessonsController {
 
     async getLessons(req, res){
         try {
-            const lessons = await lessonsServices.getLessons(req.query)
-            res.status(200).json(lessons)
+            const result = await lessonsServices.getLessons(req.query)
+            const lessonsList = result.map( (elem) => {
+                return {
+                    id: elem.id,
+                    title: elem.title,
+                    class: elem.class,
+                    studentsCount: Number(elem.dataValues.studentsCount),
+                    date: elem.date,
+                    teachers: {
+                        id: elem.teachers[0].id,
+                        name: elem.teachers[0].name
+                    }
+                }
+            })
+            res.status(200).json(lessonsList)
         } catch (error) {
             res.status(500).send({
                 message: "Something went wrong, try again.",
