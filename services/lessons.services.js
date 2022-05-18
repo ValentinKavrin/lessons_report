@@ -6,6 +6,7 @@ const models = initModels(sequelize)
 
 const lessonsRepository = require('../repository/lessons.repository')
 const teachersRepository = require('../repository/teachers.repository')
+const studentsRepository = require('../repository/students.repository')
 
 const Lessons = models.lessons
 const Students = models.students
@@ -67,14 +68,14 @@ class LessonsServices{
         try {
             let limit = 5
             if (filter.hasOwnProperty('lessonsPerPage')) limit = filter.lessonsPerPage
-            const newAttributes = [sequelize.literal(
+            const studentsCount = [sequelize.literal(
                     `(select count(*) from students 
                     where students.class = lessons.class)`
                 ),'studentsCount']
             const options = {
                 attributes: {
                     include: [
-                        newAttributes
+                        studentsCount
                     ]
                 },
                 where: {},
@@ -108,17 +109,17 @@ class LessonsServices{
                         options.where.push({date: date})
                     }
                 }
-                if (filter.hasOwnProperty('teacherIds')) {
-                    if (filter.teacherIds.includes(',')) {
-                        options.include[0].where[Op.or] = []
-                        const teachers_id = filter.teacherIds.split(',')
-                        teachers_id.forEach((elem) => {
-                            options.include[0].where[Op.or].push({id: Number(elem)})
-                        })
-                    } else {
-                        options.include[0].where = {id: Number(filter.teacherIds)}
-                    }
-                }
+                // if (filter.hasOwnProperty('teacherIds')) {
+                //     if (filter.teacherIds.includes(',')) {
+                //         options.include[0].where[Op.or] = []
+                //         const teachers_id = filter.teacherIds.split(',')
+                //         teachers_id.forEach((elem) => {
+                //             options.include[0].where[Op.or].push({id: Number(elem)})
+                //         })
+                //     } else {
+                //         options.include[0].where = {id: Number(filter.teacherIds)}
+                //     }
+                // }
                 if (filter.hasOwnProperty('class')) {
                     if (filter.class.includes(',')) {
                         const index = options.where.push({class: {}}) - 1
@@ -141,18 +142,29 @@ class LessonsServices{
         }
     }
 
-    async addStudent(params) {
-        try {
-            let lessons = []
-            for (const elem of params.lessons_id) {
-                const addStudent = await lessonsRepository.addStudent(elem, params.students_id)
-                lessons.push(addStudent)
-            }
-            return lessons
+    async getOneLesson(id) {
+        const lessonData = await lessonsRepository.getOneLesson(id)
+        if (!lessonData) {
+            throw new Error('Данное занятие не найдено')
         }
-        catch (error) {
-            throw (error)
+        const lesson = {
+            id: lessonData.id,
+            title: lessonData.title,
+            date: lessonData.date,
+            class: lessonData.class,
+            status: lessonData.status,
+            students: []
         }
+        const students = await studentsRepository.getStudentsThisClass(lesson.class)
+        if (students.length !== 0) {
+            students.forEach((student) => {
+                lesson.students.push({
+                    id: student.id,
+                    name: student.name
+                })
+            })
+        }
+        return lesson
     }
 
     async deleteLesson(id) {

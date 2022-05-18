@@ -28,6 +28,14 @@ class StudentsRepository {
         }
     }
 
+    async getStudentsThisClass(classNumber) {
+        return await Students.findAll({
+            where: {
+                class: classNumber
+            }
+        })
+    }
+
     async updateStudent(student,options) {
         try {
             return await Students.update(student, options)

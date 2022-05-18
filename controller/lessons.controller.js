@@ -46,24 +46,35 @@ class LessonsController {
         }
     }
 
-    async addStudent(req, res) {
+    async getOneLesson(req, res) {
         try {
-            const addStudents = await lessonsServices.addStudent(req.body)
-            res.status(200).json(addStudents)
+            const lesson = await lessonsServices.getOneLesson(req.params.id)
+            res.status(200).json(lesson)
         }
-        catch (error) {
-            res.status(500).send({
-                message: "Something went wrong, try again.",
-                error: error.message,
-            });
+        catch (e) {
+            switch (e.message) {
+                case 'Данный предмет не найден':
+                    return res.status(400).send({
+                        message: "Something went wrong, try again.",
+                        error: e.message,
+                    })
+                default:
+                    return res.status(500).send({
+                        message: "Something went wrong, try again.",
+                        error: e.message,
+                    })
+            }
         }
     }
 
     async deleteLesson(req,res) {
         try {
             const deleteLesson = await lessonsServices.deleteLesson(req.params.id)
-            if (deleteLesson) return res.status(200).json({message: 'Занятие успешно удалено!'})
-            else return res.status(400).json({message: 'Занятие не удалено, попробуйте еще раз!'})
+            if (deleteLesson) {
+                return res.status(200).json({message: 'Занятие успешно удалено!'})
+            } else {
+                return res.status(400).json({message: 'Занятие не удалено, попробуйте еще раз!'})
+            }
         }
         catch (error) {
             res.status(500).send({

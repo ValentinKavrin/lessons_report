@@ -26,11 +26,6 @@ class LessonsRepository {
             throw (error)
         }
     }
-  /*  [sequelize.literal(`(
-                                    select * from lessons
-                                    left outer join students
-                                    on students.class = lessons.class
-                                    )`), 'students']*/
 
     async getLessons(options){
         try {
@@ -38,6 +33,15 @@ class LessonsRepository {
         }
         catch (error) {
             throw (error)
+        }
+    }
+
+    async getOneLesson(id) {
+        try {
+            return await Lessons.findByPk(id)
+        }
+        catch (e) {
+            throw e
         }
     }
 
@@ -70,20 +74,6 @@ class LessonsRepository {
                     }
                 }
             )
-        }
-        catch (error) {
-            throw (error)
-        }
-    }
-
-    async addStudent(lesson_id, students_id) {
-        try {
-            const lesson = await Lessons.findByPk(lesson_id)
-            for (const element of students_id) {
-                const student = await Students.findByPk(element)
-                await lesson.addStudents(student, {through: Lesson_students})
-            }
-            return lesson
         }
         catch (error) {
             throw (error)
